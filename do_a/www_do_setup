@@ -1,0 +1,8 @@
+setenv MY_NDS_ROOT /autohome/AI/user/aicwchen/Andestech/AndeSight_STD_v521
+setenv NDS_TOOLCHAIN $MY_NDS_ROOT/toolchains/nds64le-elf-mculib-v5/bin
+setenv NDS_COPILOT   $MY_NDS_ROOT/COPILOT
+setenv NDS_HOME `pwd`
+
+setenv PATH "${NDS_TOOLCHAIN}:${PATH}"
+setenv ARCH riscv
+setenv CROSS_COMPILE riscv64-elf-

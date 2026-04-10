@@ -1,0 +1,29 @@
+#winnie
+set c_cyan  = "`printf '\033[1;36m'`"
+set c_green = "`printf '\033[1;32m'`"
+set c_reset = "`printf '\033[0m'`"
+
+unalias precmd >& /dev/null
+unalias cd >& /dev/null
+unalias pushd >& /dev/null
+unalias popd >& /dev/null
+unalias setprompt >& /dev/null
+unalias precmd >& /dev/null
+alias precmd 'echo "${c_cyan}[${user}@`hostname` ${cwd}]${c_reset}"'
+set prompt="%"
+
+#if ($?prompt == 0) exit
+#
+#unalias setprompt >& /dev/null
+#
+#set c_cyan  = "`printf '\033[1;36m'`"
+#set c_green = "`printf '\033[1;32m'`"
+#set c_reset = "`printf '\033[0m'`"
+#
+#alias setprompt 'set prompt="${c_cyan}[${user}@`hostname` ${cwd}]${c_reset}
+#${c_green}% ${c_reset}"'
+#
+#setprompt
+#alias cd    'chdir \!*; setprompt'
+#alias pushd 'pushd \!*; setprompt'
+#alias popd  'popd \!*; setprompt'

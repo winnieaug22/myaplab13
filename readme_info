@@ -1,0 +1,10 @@
+cd ax45mpv_advanced
+ln -s ~/myaplab13/www_do_setup
+ln -s andes_vip/patterns/samples/test_atcuart100
+cd test_atcuart100
+ln -s ~/myaplab13/www_do_build
+ln -s ~/myaplab13/www_do_sim
+ln -s ../../../../andes_ip/kv_core/top/hdl/global.inc
+#PCIE(off), BYPASS_FLASH(0x80 start)
+ln -s ../../../../andes_ip/ae350/define/sample_ae350_smu_const.vh
+#ifdef NDS_Z1 else SAMPLE_AE350_SMU_RESET_VECTOR_LO_DEFAULT h80000000->h80->h0
