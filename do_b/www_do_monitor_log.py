@@ -68,7 +68,7 @@ def main():
                 current_count = new_count
             else:
                 # No new entries found
-                print("[{0}] No new entries detected. Current total: {1}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), current_count))
+                """print("[{0}] No new entries detected. Current total: {1}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), current_count))"""
 
     except KeyboardInterrupt:
         print("\nMonitoring stopped by user.")
