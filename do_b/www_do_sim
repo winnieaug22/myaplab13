@@ -1,3 +1,0 @@
-cp NDSROM_rtlsim.dat NDSROM.dat
-make clean
-make
