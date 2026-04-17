@@ -1,0 +1,3 @@
+./mydiff.sh -c ../vcode_ori/ori/ax45mpv_advanced ../vcode/ax45mpv_advanced filelist
+./mydiff.sh oridir/ ../vcode/ax45mpv_advanced filelist
+

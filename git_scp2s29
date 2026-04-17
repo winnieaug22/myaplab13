@@ -1,0 +1,2 @@
+#!/bin/bash
+scp aplab13:/autohome/AI/nuser/T3/aib30341/myaplab13/bundle_* .

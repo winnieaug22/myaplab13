@@ -1,0 +1,6 @@
+andes_ip/ae350/define/sample_ae350_smu_const.vh
+andes_ip/kv_core/top/hdl/global.inc
+testbench/platform_dump.v
+testbench/ae350_tb.sv
+andes_ip/kv_core/top/hdl/ae350_vcpu_cluster_subsystem.v
+andes_vip/monitors/hdl/kv/instn_simple_pipe_mon.sv
