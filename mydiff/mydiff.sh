@@ -122,9 +122,9 @@ else
 fi
 echo
 
-if (( ${#missing_in_modified_paths[@]} > 0 )); then
+if [[ -n "${missing_in_modified_paths[*]:-}" ]]; then
     echo "📄 Files missing or not comparable in Modified:"
-    for path in "${missing_in_modified_paths[@]}"; do
+    for path in "${missing_in_modified_paths[@]:-}"; do
         echo "  - $path"
     done
     echo
@@ -134,22 +134,24 @@ fi
 if [[ "$COPY_MODE" == true ]]; then
     echo "📂 Starting copy process..."
     copied_count=0
-    for i in "${!target_rel_paths[@]}"; do
-        rel_path="${target_rel_paths[$i]}"
-        file_a="${target_file_a[$i]}"
-        file_b="${target_file_b[$i]}"
+    if [[ -n "${target_rel_paths[*]:-}" ]]; then
+        for i in "${!target_rel_paths[@]}"; do
+            rel_path="${target_rel_paths[$i]}"
+            file_a="${target_file_a[$i]}"
+            file_b="${target_file_b[$i]}"
 
-        if [[ -f "$file_a" ]]; then
-            mkdir -p "${GOLDEN_OUT_DIR}/$(dirname "$rel_path")"
-            cp "$file_a" "${GOLDEN_OUT_DIR}/$rel_path"
-        fi
+            if [[ -f "$file_a" ]]; then
+                mkdir -p "${GOLDEN_OUT_DIR}/$(dirname "$rel_path")"
+                cp "$file_a" "${GOLDEN_OUT_DIR}/$rel_path"
+            fi
 
-        if [[ -f "$file_b" ]]; then
-            mkdir -p "${MODIFIED_OUT_DIR}/$(dirname "$rel_path")"
-            cp "$file_b" "${MODIFIED_OUT_DIR}/$rel_path"
-        fi
-        ((copied_count++))
-    done
+            if [[ -f "$file_b" ]]; then
+                mkdir -p "${MODIFIED_OUT_DIR}/$(dirname "$rel_path")"
+                cp "$file_b" "${MODIFIED_OUT_DIR}/$rel_path"
+            fi
+            ((copied_count++))
+        done
+    fi
 
     if (( copied_count > 0 )); then
         echo "✅ Successfully copied $copied_count files (maintaining structure) into './${GOLDEN_OUT_DIR}' and './${MODIFIED_OUT_DIR}'."
@@ -160,7 +162,7 @@ if [[ "$COPY_MODE" == true ]]; then
 fi
 
 # --- Action: Interactive Vimdiff Mode ---
-if (( ${#target_rel_paths[@]} == 0 )); then
+if [[ -z "${target_rel_paths[*]:-}" ]]; then
     echo "🎉 No selectable files found. Everything matches!"
     exit 0
 fi
@@ -171,7 +173,7 @@ declare -a selected_indices
 add_index() {
     local idx="$1"
     local existing
-    for existing in "${selected_indices[@]}"; do
+    for existing in "${selected_indices[@]:-}"; do
         [[ "$existing" -eq "$idx" ]] && return
     done
     selected_indices+=("$idx")
@@ -240,7 +242,7 @@ while true; do
         done
     fi
 
-    if (( ${#selected_indices[@]} == 0 )); then
+    if [[ -z "${selected_indices[*]:-}" ]]; then
         echo "⚠️  No valid files selected. Please try again."
         continue
     fi
