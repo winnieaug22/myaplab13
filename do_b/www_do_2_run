@@ -3,7 +3,7 @@
 source www_do_22_monitor
 
 cp NDSROM_rtlsim.dat NDSROM.dat
-#make clean
-#time make
+make clean
+time make
 #<1.User time> <2.System time> <3.Elapsed time> <4.CPU Usage rate>
 #3. Elapsed time = min:sec
