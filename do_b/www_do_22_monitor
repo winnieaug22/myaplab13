@@ -3,7 +3,7 @@
 set host = `hostname`
 
 if ( "$host" == "aplab13" ) then
-    xterm -hold -e "sh -c 'python -u www_do_monitor_log.py | tee monitor_aplab13.log'" &
+    xterm -hold -e "sh -c 'python -u www_do_monitor_log.py | tee www_log_monitor_aplab13'" &
 else if ( "$host" == "aplab14" ) then
-    xterm -hold -e "sh -c 'python3 -u www_do_monitor_log.py | tee monitor_aplab14.log'" &
+    xterm -hold -e "sh -c 'python3 -u www_do_monitor_log.py | tee www_log_monitor_aplab14'" &
 endif
