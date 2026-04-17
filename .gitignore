@@ -1,3 +1,5 @@
 bundle_*
 patch_*
 patches_*
+.nfs_*
+*.swp
