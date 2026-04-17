@@ -1,3 +1,3 @@
 ./mydiff.sh -c ../../sshfs_aplab14_home/c2s_ax45mpv_advanced/ ../../ax45mpv_advanced_zebu20260331/ filelist
-./mydiff.sh gol
+./mydiff.sh golden ../../ax45mpv_advanced_zebu20260331/ filelist
 
