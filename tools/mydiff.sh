@@ -74,22 +74,6 @@ if (( diff_count == 0 )); then
     exit 0
 fi
 
-echo "Different files:"
-for i in "${!diff_rel_paths[@]}"; do
-    printf "  [%d] %s\n" "$((i + 1))" "${diff_rel_paths[$i]}"
-done
-echo
-echo "Enter one or more numbers separated by spaces to open with vimdiff."
-echo "You can also use ranges such as 1-3 7 9-10."
-echo "Enter 'a' to open all, or 'q' to quit."
-
-read -r -p "Selection: " selection
-
-if [[ "$selection" == "q" || "$selection" == "Q" ]]; then
-    echo "Aborted by user."
-    exit 0
-fi
-
 declare -a selected_indices
 
 add_index() {
@@ -103,48 +87,78 @@ add_index() {
     selected_indices+=("$idx")
 }
 
-if [[ "$selection" == "a" || "$selection" == "A" ]]; then
+while true; do
+    echo "Different files:"
     for i in "${!diff_rel_paths[@]}"; do
-        selected_indices+=("$i")
+        printf "  [%d] %s\n" "$((i + 1))" "${diff_rel_paths[$i]}"
     done
-else
-    for token in $selection; do
-        if [[ "$token" =~ ^[0-9]+$ ]]; then
-            num="$token"
-            if (( num >= 1 && num <= diff_count )); then
-                add_index "$((num - 1))"
-            else
-                echo "Warning: index out of range: $num"
-            fi
-        elif [[ "$token" =~ ^([0-9]+)-([0-9]+)$ ]]; then
-            start="${BASH_REMATCH[1]}"
-            end="${BASH_REMATCH[2]}"
+    echo
+    echo "Enter one or more numbers separated by spaces to open with vimdiff."
+    echo "You can also use ranges such as 1-3 7 9-10."
+    echo "Enter 'a' (or 's') to open all sequentially, or 'q' to quit."
 
-            if (( start > end )); then
-                tmp="$start"
-                start="$end"
-                end="$tmp"
-            fi
+    read -r -p "Selection: " selection
 
-            for ((num = start; num <= end; num++)); do
+    if [[ "$selection" == "q" || "$selection" == "Q" ]]; then
+        echo "Exiting."
+        exit 0
+    fi
+
+    selected_indices=()
+
+    if [[ "$selection" == "a" || "$selection" == "A" || "$selection" == "s" || "$selection" == "S" ]]; then
+        for i in "${!diff_rel_paths[@]}"; do
+            selected_indices+=("$i")
+        done
+    else
+        for token in $selection; do
+            if [[ "$token" =~ ^[0-9]+$ ]]; then
+                num="$token"
                 if (( num >= 1 && num <= diff_count )); then
                     add_index "$((num - 1))"
                 else
                     echo "Warning: index out of range: $num"
                 fi
-            done
-        else
-            echo "Warning: invalid token ignored: $token"
+            elif [[ "$token" =~ ^([0-9]+)-([0-9]+)$ ]]; then
+                start="${BASH_REMATCH[1]}"
+                end="${BASH_REMATCH[2]}"
+
+                if (( start > end )); then
+                    tmp="$start"
+                    start="$end"
+                    end="$tmp"
+                fi
+
+                for ((num = start; num <= end; num++)); do
+                    if (( num >= 1 && num <= diff_count )); then
+                        add_index "$((num - 1))"
+                    else
+                        echo "Warning: index out of range: $num"
+                    fi
+                done
+            else
+                echo "Warning: invalid token ignored: $token"
+            fi
+        done
+    fi
+
+    if (( ${#selected_indices[@]} == 0 )); then
+        echo "No files selected."
+        continue
+    fi
+
+    for idx in "${selected_indices[@]}"; do
+        read -r -p "Open vimdiff for: ${diff_rel_paths[$idx]}? [Y/n/q(uit sequence)]: " ans
+        if [[ "$ans" == "q" || "$ans" == "Q" ]]; then
+            echo "Aborting remaining files in this selection."
+            break
+        elif [[ "$ans" == "n" || "$ans" == "N" ]]; then
+            continue
         fi
+        vimdiff "${diff_file_a[$idx]}" "${diff_file_b[$idx]}"
     done
-fi
-
-if (( ${#selected_indices[@]} == 0 )); then
-    echo "No files selected."
-    exit 0
-fi
-
-for idx in "${selected_indices[@]}"; do
-    echo "Opening vimdiff for: ${diff_rel_paths[$idx]}"
-    vimdiff "${diff_file_a[$idx]}" "${diff_file_b[$idx]}"
+    
+    echo
+    echo "--- Finished checking selected files ---"
+    echo
 done
