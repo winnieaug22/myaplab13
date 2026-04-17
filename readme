@@ -1,9 +1,15 @@
 set RED    = "\033[31m"
 set GREEN  = "\033[32m"
 set NC     = "\033[0m"
+
 #cd ax45mpv_advanced
 ln -sf /autohome/AI/nuser/T3/aib30341/myaplab13/do_a/* .
 ln -sf andes_vip/patterns/samples/test_atcuart100
 cd test_atcuart100
 ln -sf /autohome/AI/nuser/T3/aib30341/myaplab13/do_b/* .
+
+#Git
+ #andes_ip
+ #andes_vip
+ #testbench
 
