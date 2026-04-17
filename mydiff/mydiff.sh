@@ -10,8 +10,8 @@ set -u
 
 # --- Configuration & Variables ---
 COPY_MODE=false
-OUT_DIR_A="oridir"
-OUT_DIR_B="newdir"
+GOLDEN_OUT_DIR="golden"
+MODIFIED_OUT_DIR="modified"
 
 # --- Parse Arguments ---
 if [[ "${1:-}" == "-c" || "${1:-}" == "--copy" ]]; then
@@ -19,18 +19,18 @@ if [[ "${1:-}" == "-c" || "${1:-}" == "--copy" ]]; then
     shift
 fi
 
-DIR_A="${1:-}"
-DIR_B="${2:-}"
+GOLDEN_DIR="${1:-}"
+MODIFIED_DIR="${2:-}"
 FILELIST="${3:-}"
 
 # --- Validation ---
-if [[ -z "$DIR_A" || -z "$DIR_B" ]]; then
-    echo "Usage: $0 [-c|--copy] <dir_A> <dir_B> [filelist]"
-    echo "  -c, --copy   Copy matched/diff files to './${OUT_DIR_A}' and './${OUT_DIR_B}' instead of vimdiff"
+if [[ -z "$GOLDEN_DIR" || -z "$MODIFIED_DIR" ]]; then
+    echo "Usage: $0 [-c|--copy] <golden_dir> <modified_dir> [filelist]"
+    echo "  -c, --copy   Copy matched/diff files to './${GOLDEN_OUT_DIR}' and './${MODIFIED_OUT_DIR}' instead of vimdiff"
     exit 1
 fi
 
-for dir in "$DIR_A" "$DIR_B"; do
+for dir in "$GOLDEN_DIR" "$MODIFIED_DIR"; do
     if [[ ! -d "$dir" ]]; then
         echo "❌ Error: Directory does not exist: $dir"
         exit 1
@@ -52,7 +52,7 @@ declare -a target_rel_paths
 declare -a target_file_a
 declare -a target_file_b
 declare -a target_status
-declare -a missing_in_b_paths
+declare -a missing_in_modified_paths
 
 # --- Core Logic ---
 echo "🔍 Comparing directories..."
@@ -63,8 +63,8 @@ if [[ -n "$FILELIST" ]]; then
         # Skip empty lines
         [[ -z "$rel_path" ]] && continue
 
-        file_a="$DIR_A/$rel_path"
-        file_b="$DIR_B/$rel_path"
+        file_a="$GOLDEN_DIR/$rel_path"
+        file_b="$MODIFIED_DIR/$rel_path"
 
         target_rel_paths+=("$rel_path")
         target_file_a+=("$file_a")
@@ -74,10 +74,10 @@ if [[ -n "$FILELIST" ]]; then
             target_status+=("Missing in both")
             ((missing_count++))
         elif [[ ! -f "$file_a" ]]; then
-            target_status+=("Missing in A")
+            target_status+=("Missing in Golden")
             ((missing_count++))
         elif [[ ! -f "$file_b" ]]; then
-            target_status+=("Missing in B")
+            target_status+=("Missing in Modified")
             ((missing_count++))
         elif cmp -s "$file_a" "$file_b"; then
             target_status+=("Same")
@@ -88,13 +88,13 @@ if [[ -n "$FILELIST" ]]; then
         fi
     done < "$FILELIST"
 else
-    # Mode 2: Recursively find and compare all files in DIR_A against DIR_B
+    # Mode 2: Recursively find and compare all files in GOLDEN_DIR against MODIFIED_DIR
     while IFS= read -r -d '' file_a; do
-        rel_path="${file_a#"$DIR_A"/}"
-        file_b="$DIR_B/$rel_path"
+        rel_path="${file_a#"$GOLDEN_DIR"/}"
+        file_b="$MODIFIED_DIR/$rel_path"
 
         if [[ ! -f "$file_b" ]]; then
-            missing_in_b_paths+=("$rel_path")
+            missing_in_modified_paths+=("$rel_path")
             ((missing_count++))
             continue
         fi
@@ -108,7 +108,7 @@ else
             target_status+=("Different")
             ((diff_count++))
         fi
-    done < <(find "$DIR_A" -type f -print0)
+    done < <(find "$GOLDEN_DIR" -type f -print0)
 fi
 
 # --- Summary Report ---
@@ -118,13 +118,13 @@ echo "  ⚠️  Different: $diff_count"
 if [[ -n "$FILELIST" ]]; then
     echo "  ❌ Missing: $missing_count"
 else
-    echo "  ❌ Missing or not comparable in B: $missing_count"
+    echo "  ❌ Missing or not comparable in Modified: $missing_count"
 fi
 echo
 
-if (( ${#missing_in_b_paths[@]} > 0 )); then
-    echo "📄 Files missing or not comparable in B:"
-    for path in "${missing_in_b_paths[@]}"; do
+if (( ${#missing_in_modified_paths[@]} > 0 )); then
+    echo "📄 Files missing or not comparable in Modified:"
+    for path in "${missing_in_modified_paths[@]}"; do
         echo "  - $path"
     done
     echo
@@ -140,19 +140,19 @@ if [[ "$COPY_MODE" == true ]]; then
         file_b="${target_file_b[$i]}"
 
         if [[ -f "$file_a" ]]; then
-            mkdir -p "${OUT_DIR_A}/$(dirname "$rel_path")"
-            cp "$file_a" "${OUT_DIR_A}/$rel_path"
+            mkdir -p "${GOLDEN_OUT_DIR}/$(dirname "$rel_path")"
+            cp "$file_a" "${GOLDEN_OUT_DIR}/$rel_path"
         fi
 
         if [[ -f "$file_b" ]]; then
-            mkdir -p "${OUT_DIR_B}/$(dirname "$rel_path")"
-            cp "$file_b" "${OUT_DIR_B}/$rel_path"
+            mkdir -p "${MODIFIED_OUT_DIR}/$(dirname "$rel_path")"
+            cp "$file_b" "${MODIFIED_OUT_DIR}/$rel_path"
         fi
         ((copied_count++))
     done
 
     if (( copied_count > 0 )); then
-        echo "✅ Successfully copied $copied_count files (maintaining structure) into './${OUT_DIR_A}' and './${OUT_DIR_B}'."
+        echo "✅ Successfully copied $copied_count files (maintaining structure) into './${GOLDEN_OUT_DIR}' and './${MODIFIED_OUT_DIR}'."
     else
         echo "⚠️  No files were copied."
     fi
@@ -247,7 +247,14 @@ while true; do
 
     # Open selected files in vimdiff
     for idx in "${selected_indices[@]}"; do
-        echo "🚀 Opening vimdiff for: ${target_rel_paths[$idx]}"
+        read -r -p "🚀 Open vimdiff for: ${target_rel_paths[$idx]}? [Y/n/q] " ans
+        if [[ "${ans,,}" == "q" ]]; then
+            echo "🛑 Stopping current batch."
+            break
+        elif [[ "${ans,,}" == "n" ]]; then
+            echo "⏭️  Skipping..."
+            continue
+        fi
         vimdiff "${target_file_a[$idx]}" "${target_file_b[$idx]}"
     done
     
