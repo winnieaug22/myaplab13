@@ -67,22 +67,6 @@ always @(posedge core_clk) begin
         $display("%0t:ipipe:%0d:@%h=%h",$time, CORE_ID, wb_i1_pc, wb_i1_instr);
     end
 end
-always @(system.ae350_chip.X_gpio[15:0]) begin
-    if ( CORE_ID === 0 ) begin
-       if (i0_inst_retire & (~is_reduntant_core)) begin
-       	$display("[%0t]i0[@%h][%h] www_debug:0x%h",
-       	         $time,
-       	         wb_i0_pc, wb_i0_instr,
-       	         system.ae350_chip.X_gpio[15:0]);
-       end
-       if (i1_inst_retire & (~is_reduntant_core)) begin
-       	$display("[%0t]i1[@%h][%h] www_debug:0x%h",
-       	         $time,
-       	         wb_i1_pc, wb_i1_instr,
-       	         system.ae350_chip.X_gpio[15:0]);
-       end
-    end
-end
 
 integer instn_count; initial instn_count = 0;
 integer cpu_cycles;  initial cpu_cycles  = 0;

@@ -174,7 +174,7 @@ add_index() {
     local idx="$1"
     local existing
     for existing in "${selected_indices[@]:-}"; do
-        [[ "$existing" -eq "$idx" ]] && return
+        [[ "$existing" == "$idx" ]] && return
     done
     selected_indices+=("$idx")
 }

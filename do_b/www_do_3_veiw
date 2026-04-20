@@ -1,1 +1,2 @@
 make sim
+#split -b 1G -d verilog.log www_log_verilog_part_
