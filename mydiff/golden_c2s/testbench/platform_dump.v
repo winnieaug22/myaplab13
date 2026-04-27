@@ -11,7 +11,7 @@ initial begin
 	`else
 	`ifdef FSDB
 		//$fsdbDumpfile("verilog.fsdb");
-		$fsdbAutoSwitchDumpfile(100, "verilog.fsdb", 10);
+		//$fsdbAutoSwitchDumpfile(100, "verilog.fsdb", 10);
 	`else
 	`ifdef VPD
 		$vcdplusfile("verilog.vpd");
@@ -39,18 +39,18 @@ initial begin
 			$fsdbDumpvars(1,system.ae350_chip);	
 			`endif			
 		`else
-			$dumpoff;
+			//$fsdbDumpvars;
 			$display("[%0t] www:no dump", $time);
-			// $display("[%0t] www:dump by gpio( face to beef )", $time);
-			// //$fsdbDumpvars;
-			// wait (system.ae350_chip.X_gpio[15:0] === 16'hface);
-			// $display("[%0t] www:GPIO Asserted, Dump-Start !!!", $time);
-			// $fsdbAutoSwitchDumpfile(100, "verilog.fsdb", 10);
-			// $fsdbDumpvars;
 
-			// wait (system.ae350_chip.X_gpio[15:0] === 16'hbeef);
-			// $display("[%0t] www:GPIO Asserted, Dump-END !!!", $time);
-			// $dumpoff;
+			//$display("[%0t] www:dump by gpio( face to beef )", $time);
+			//wait (system.ae350_chip.X_gpio[15:0] === 16'hface);
+			//$display("[%0t] www:GPIO Asserted, Dump-Start !!!", $time);
+			//$fsdbAutoSwitchDumpfile(100, "verilog.fsdb", 10);
+			//$fsdbDumpvars;
+
+			//wait (system.ae350_chip.X_gpio[15:0] === 16'hbeef);
+			//$display("[%0t] www:GPIO Asserted, Dump-END !!!", $time);
+			//$dumpoff;
 		`endif		
 	`else
 	`ifdef VPD
